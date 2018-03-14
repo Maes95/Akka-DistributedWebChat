@@ -9,7 +9,6 @@ This is a distributed WebChat with PlayFramework and Akka.
 ## SetUp
 
 ```sh
-$ cd TFG-WebChat/AkkaPlay-WebChat
 $ ./activator dist
 $ unzip target/universal/webchat-1.0.zip -d target/universal/
 ```

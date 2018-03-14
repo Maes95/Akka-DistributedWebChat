@@ -1,16 +1,15 @@
 package actors;
 
 import akka.actor.*;
+import akka.cluster.pubsub.DistributedPubSub;
+import akka.cluster.pubsub.DistributedPubSubMediator;
 import com.fasterxml.jackson.databind.JsonNode;
 import messages.*;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
 
 import play.libs.Akka;
-import utils.EventBus;
 
 
 public class User extends AbstractActor {
@@ -19,18 +18,18 @@ public class User extends AbstractActor {
     private final static Set<String> users = new ConcurrentSkipListSet<>();
 
     private final ActorRef out;
-    private final ActorRef chatManager;
     private String userName;
     private String chatName;
+    private ActorRef mediator;
     
 
     public static Props props(ActorRef out) {
-        return Props.create(User.class, out, Akka.system().actorFor("akka://application/user/ChatManager"));
+        return Props.create(User.class, out);
     }
 
-    public User(ActorRef out, ActorRef chatManager) {
+    public User(ActorRef out) {
         this.out = out;
-        this.chatManager = chatManager;
+        this.mediator = DistributedPubSub.get(getContext().system()).mediator();
     }
 
     @Override
@@ -51,13 +50,17 @@ public class User extends AbstractActor {
                             // USERNAME AVAILIBLE
                             this.chatName = json.get("chat").asText();
                             users.add(this.userName);
-                            EventBus.eventBus().subscribe(getSelf(), chatName);
+
+                            // subscribe to the topic named "content"
+                            this.mediator.tell(new DistributedPubSubMediator.Subscribe(this.chatName, getSelf()),getSelf());
+                            //EventBus.eventBus().subscribe(getSelf(), chatName);
                         }
                     }
                     // Normal message
                     else{
                         Message msg = new Message(json.get("name").asText(),json.get("message").asText());
-                        EventBus.eventBus().publish(new MsgEnvelope(this.chatName, msg));
+                        //EventBus.eventBus().publish(new MsgEnvelope(this.chatName, msg));
+                        mediator.tell(new DistributedPubSubMediator.Publish(this.chatName, msg),getSelf());
                     }
                 })
 
@@ -72,8 +75,7 @@ public class User extends AbstractActor {
     @Override
     public void postStop(){
         if (this.chatName!=null){
-            EventBus.eventBus().unsubscribe(getSelf());
-            users.remove(userName);
+            mediator.tell(new DistributedPubSubMediator.Unsubscribe(this.chatName, getSelf()),getSelf());
         }
     }
     

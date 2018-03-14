@@ -24,3 +24,4 @@ target
 /.settings
 /RUNNING_PID
 webchat-1.0
+*.pem

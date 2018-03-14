@@ -262,7 +262,7 @@
 				name = "user1";
 			}
 
-			const websocket = new WebSocket("ws://localhost:9000/chat");
+			const websocket = new WebSocket("ws://"+location.hostname+":"+location.port+"/chat");
 
 		 	websocket.onopen = function(ev) {
 				newSystemMessage('Connected to '+app);

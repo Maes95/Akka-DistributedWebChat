@@ -14,10 +14,6 @@ public class Message implements Serializable{
         this.message = message;
     }
 
-    public String getName() {
-        return name;
-    }
-
     public ObjectNode getJson () {
         ObjectNode msgdata = Json.newObject();
         msgdata.put("name",name);
