@@ -25,3 +25,4 @@ target
 /RUNNING_PID
 webchat-1.0
 *.pem
+haproxy/haproxy.cfg

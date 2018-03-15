@@ -27,7 +27,7 @@ def url_is_alive(dns):
 
 def run(pem, node, zip_file, seed):
     dns = node['DNS']
-    print("RUNNING %s" % dns)
+    print("STARTING %s" % dns)
     outfile = open('logs/%s-log.log' % dns, 'w')
     subprocess.call("./scripts/deploy.sh %s %s %s %s %s &" % (pem, dns, zip_file, node["PRIVATE_IP"], seed['PRIVATE_IP']), shell=True, stdout=outfile, stderr=outfile)
     with open(os.devnull, "w") as f:
