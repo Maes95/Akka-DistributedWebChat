@@ -4,9 +4,9 @@ import time
 import urllib.request
 import os
 
-pem="scripts/Vertx.pem"
+pem="scripts/TFG.pem"
 zip_file="target/universal/webchat-1.0.zip"
-groupName="VertxCluster"
+groupName="Cluster"
 count=1
 
 def url_is_alive(dns):
@@ -35,18 +35,19 @@ def run(pem, node, zip_file, seed):
 
 
 subprocess.call("rm haproxy/haproxy.cfg", shell=True)
-res=json.loads(subprocess.Popen("aws ec2 describe-instances --filter Name=\"instance.group-name\",Values=\"%s\"" % groupName, shell=True, stdout=subprocess.PIPE).stdout.read())
+res=subprocess.Popen(" aws ec2 describe-instances --filter Name=instance.group-name,Values=\"%s\" Name=instance-state-name,Values=running --query 'Reservations[*].Instances[*].[PublicDnsName, PrivateIpAddress, PublicIpAddress]' --output text" % groupName, shell=True, stdout=subprocess.PIPE).stdout.read()
 have_master=False
 
 nodes = []
 master = None
 
-for instance in res['Reservations'][0]['Instances']:
+
+for instance in [ i.split('\t') for i in res.decode("utf-8").split('\n') if len(i.split('\t')) == 3]:
 
     node= dict()
-    node['DNS'] = instance['PublicDnsName']
-    node['PRIVATE_IP'] = instance['PrivateIpAddress']
-    node['PUBLIC_IP'] = instance['PublicIpAddress']
+    node['DNS'] = instance[0]
+    node['PRIVATE_IP'] = instance[1]
+    node['PUBLIC_IP'] = instance[2]
     # ONLY FIRST
     if not have_master:
         have_master = True

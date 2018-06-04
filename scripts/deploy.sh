@@ -12,9 +12,9 @@ SEED=$5
 
 TARGET="ubuntu@${DNS}:/home/ubuntu/"
 
-#scp -i $PEM installDependencies.sh "${TARGET}installDependencies.sh"
-#ssh -i $PEM "ubuntu@${DNS}" chmod +x "installDependencies.sh"
-#ssh -i $PEM "ubuntu@${DNS}" ./installDependencies.sh
+scp -i $PEM -o "StrictHostKeyChecking no" scripts/installDependencies.sh "${TARGET}installDependencies.sh"
+ssh -i $PEM -o "StrictHostKeyChecking no" "ubuntu@${DNS}" chmod +x "installDependencies.sh"
+ssh -i $PEM "ubuntu@${DNS}" ./installDependencies.sh
 
 ssh -i $PEM "ubuntu@${DNS}" "rm WebChat.zip"
 ssh -i $PEM "ubuntu@${DNS}" "rm -rf webchat-1.0"
@@ -26,13 +26,3 @@ ssh -i $PEM "ubuntu@${DNS}" "unzip WebChat.zip"
 ssh -i $PEM "ubuntu@${DNS}" "rm webchat-1.0/RUNNING_PID"
 ssh -i $PEM "ubuntu@${DNS}" "sed 's/HOST/${IP}/' webchat-1.0/conf/application.base > webchat-1.0/conf/application.conf"
 ssh -i $PEM "ubuntu@${DNS}" "./webchat-1.0/bin/webchat -Dakka.cluster.seed-nodes.0=akka.tcp://application@${SEED}:8000"
-#ssh -i $PEM "ubuntu@${DNS}" java -jar Node.jar -cluster
-
-
-# FILE=Vertx-DistributedWebChat/target/WebChatVertxMaven-0.1.0-fat.jar
-#
-# # NODE 1
-# scp -i $PEM $FILE ubuntu@ec2-54-154-158-98.eu-west-1.compute.amazonaws.com:/home/ubuntu/WebChatVertxMaven-0.1.0-fat.jar
-# # NODE 2
-# scp -i $PEM $FILE ubuntu@ec2-54-154-158-98.eu-west-1.compute.amazonaws.com:/home/ubuntu/WebChatVertxMaven-0.1.0-fat.jar
-# target/WebChatVertxMaven-0.1.0-fat.jar
